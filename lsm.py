@@ -19,9 +19,13 @@ class LeastSquares:
         self.with_errors = with_errors
 
         # Основні величини
-        self.S_X2 = mean([xi**2 for xi in x]) - mean(x) ** 2
-        self.S_Y2 = mean([yi**2 for yi in y]) - mean(y) ** 2
-        self.R_XY = mean([xi * yi for xi, yi in zip(x, y)]) - mean(x) * mean(y)
+        self.x2 = [xi**2 for xi in x]
+        self.y2 = [yi**2 for yi in y]
+        self.xy = [xi * yi for xi, yi in zip(x, y)]
+
+        self.S_X2 = mean(self.x2) - mean(x) ** 2
+        self.S_Y2 = mean(self.y2) - mean(y) ** 2
+        self.R_XY = mean(self.xy) - mean(x) * mean(y)
 
         if self.S_X2 == 0:
             raise ZeroDivisionError("All X values are the same → regression cannot be computed.")
@@ -29,6 +33,13 @@ class LeastSquares:
         # Коефіцієнти
         self.alpha = self.R_XY / self.S_X2
         self.beta = mean(y) - self.alpha * mean(x)
+
+    def table(self):
+        """Повертає таблицю x, y, x^2, y^2, xy."""
+        header = f"{'x':>8} {'y':>8} {'x^2':>8} {'y^2':>8} {'xy':>8}"
+        rows = [f"{xi:8.3f} {yi:8.3f} {xi2:8.3f} {yi2:8.3f} {xy:8.3f}"
+                for xi, yi, xi2, yi2, xy in zip(self.x, self.y, self.x2, self.y2, self.xy)]
+        return header + "\n" + "\n".join(rows)
 
     def formula(self):
         """Повертає формулу у вигляді рядка."""
@@ -60,7 +71,10 @@ class LeastSquares:
         }
 
     def __str__(self):
-        result = colorama.Fore.BLUE + "Formula: " + colorama.Fore.RESET + "\n"
+        result = colorama.Fore.CYAN + "Table of values:\n" + colorama.Fore.RESET
+        result += self.table() + "\n\n"
+
+        result += colorama.Fore.BLUE + "Formula: " + colorama.Fore.RESET + "\n"
         result += colorama.Style.BRIGHT + self.formula() + "\n" + colorama.Style.RESET_ALL
         if self.with_errors:
             errs = self.errors()
@@ -114,5 +128,6 @@ def main():
     print(colorama.Style.BRIGHT + colorama.Fore.RED + "\n --- # ENDING PROGRAM # --- " + colorama.Style.RESET_ALL)
 
 
-main()
-input("Press Enter to exit...")
+if __name__ == "__main__":
+    main()
+    input("Press Enter to exit...")
